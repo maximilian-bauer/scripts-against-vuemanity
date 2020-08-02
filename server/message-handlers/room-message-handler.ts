@@ -1,0 +1,114 @@
+import State from "../state/state";
+
+import PlayerModel from "../../shared/player";
+import RoomModel from "../../shared/room";
+import RoomOptions from "../../shared/room-options";
+
+import JoinRoomResponseType from "../../shared/join-room-response-type";
+import CreateRoomResponseType from "../../shared/create-room-response-type";
+
+
+
+export default class RoomMessageHandler {
+
+  constructor(socket: SocketIO.Socket) {
+
+    socket.on('joinRoomRequest', (joinRoomRequestString: string) => {
+      console.log(`[Player]: ${joinRoomRequestString}`);
+
+      const joinRoomRequest = JSON.parse(joinRoomRequestString);
+      const player: PlayerModel = new PlayerModel(joinRoomRequest.nickname);
+      
+      const room = State.instance.rooms.get(joinRoomRequest.roomID);
+
+      if(room !== undefined){
+        if(room.players.has(player.nickname)){
+          const existingPlayer = room.players.get(player.nickname);
+          if (existingPlayer !== undefined && !existingPlayer.connected) {
+            existingPlayer.connected = true;
+
+            // HACK: room.players is a Map which cannot be stringified. Even when transmitting without stringifiying, this does not work.
+            // Thus send players separately as an Array.
+            const response = {type: JoinRoomResponseType.ACCEPT, room: room, players: Array.from(room.players.entries())};
+            this.switchRoom(socket, joinRoomRequest.roomID);
+            socket.emit("joinRoomResponse", JSON.stringify(response));
+            //TODO: instead of sending playerJoin, send something like playerUpdate with an update type for clarity.
+            socket.broadcast.to(room.id).emit("playerJoin", JSON.stringify(existingPlayer));
+          } else {
+            const response = {type: JoinRoomResponseType.DENY_PLAYER_ALREADY_CONNECTED, room: null, players: null};
+            socket.emit("joinRoomResponse", JSON.stringify(response));
+          }
+        } else {
+          State.instance.socketPlayerMap.set(socket, {room: joinRoomRequest.roomID, nickname: player.nickname});
+          State.instance.rooms.get(joinRoomRequest.roomID)?.players.set(player.nickname, player);
+
+          const response = {type: JoinRoomResponseType.ACCEPT, room: room, players: Array.from(room.players.entries())};
+          this.switchRoom(socket, joinRoomRequest.roomID);
+
+          socket.emit("joinRoomResponse", JSON.stringify(response));
+          socket.broadcast.to(room.id).emit("playerJoin", JSON.stringify(player));
+        }
+      } else {
+        const response = {type: JoinRoomResponseType.DENY_ROOM_DOES_NOT_EXIST , room: null, players: null};
+        socket.emit("joinRoomResponse", JSON.stringify(response));
+      }
+    });
+
+    socket.on('createRoomRequest', (createRoomRequestString: string) => {
+      console.log(`[Player]: ${createRoomRequestString}`)
+
+      const createRoomRequest = JSON.parse(createRoomRequestString);
+      const player: PlayerModel = new PlayerModel(createRoomRequest.nickname);
+      
+      console.log(`existing rooms: ${JSON.stringify(State.instance.rooms)}`)
+      if (!State.instance.rooms.has(createRoomRequest.roomID)) {
+        State.instance.socketPlayerMap.set(socket, {room: createRoomRequest.roomID, nickname: createRoomRequest.nickname});
+
+        const room = new RoomModel(createRoomRequest.roomID, player);
+        State.instance.rooms.set(room.id, room);
+
+        console.log("added new room");
+        socket.emit("createRoomResponse", CreateRoomResponseType.ACCEPT);
+        this.switchRoom(socket, createRoomRequest.roomID);
+      } else {
+        console.log(`Room ${createRoomRequest.roomID} already exists.`)
+        socket.emit("createRoomResponse", CreateRoomResponseType.DENY_ROOM_ALREADY_EXISTS);
+      }
+
+    });
+
+    socket.on('changeRoomOptions', (optionsMessageString: string) => {
+      console.log(`[RoomOptions]: ${optionsMessageString}`);
+      const optionsMessage = JSON.parse(optionsMessageString);
+
+      const roomName = optionsMessage.roomID;
+      const room = State.instance.rooms.get(optionsMessage.roomID);
+
+      if(room !== undefined){
+        room.options = JSON.parse(optionsMessageString);
+      }
+        
+      socket.broadcast.to(roomName).emit('roomOptions', optionsMessageString);
+
+      console.log("Changed room options to " + optionsMessageString);
+    });
+  }
+
+  /**
+  * Make the socket leave all it's current rooms and join a new one.
+  * @param {SocketIO.Socket} socket the socket whose room to switch
+  * @param {string} newRoom the name of the room to join
+  */
+  switchRoom(socket: SocketIO.Socket, newRoomName: string) {
+
+    console.log(`Switching room to ${newRoomName} for socket ${socket.id} of user ${State.instance.socketPlayerMap.get(socket)?.nickname}.` )
+
+    const currentRooms = socket.server.sockets.adapter.sids[socket.id];
+    for(let room in currentRooms) {
+      socket.leave(room);
+    }
+    socket.join(newRoomName);
+
+  }
+
+}

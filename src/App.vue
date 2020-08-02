@@ -1,29 +1,49 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png" />
-    <HelloWorld msg="Welcome to Your Vue.js + TypeScript App" />
+    <div id="connection-banner" :hidden="connected">
+      Not connected to server
+    </div>
+    <router-view></router-view>
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-import HelloWorld from "./components/HelloWorld.vue";
 
-@Component({
-  components: {
-    HelloWorld
+@Component({})
+export default class App extends Vue {
+  get connected() {
+    return this.$store.state.connected;
   }
-})
-export default class App extends Vue {}
+}
 </script>
 
-<style>
+<style lang="less">
+@import "style/colors.less";
+
+html,
+body {
+  background-color: @color-bg;
+}
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
+  background-color: @color-bg;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
   margin-top: 60px;
+}
+
+#connection-banner {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  text-align: center;
+
+  padding: 4px 0;
+
+  background-color: #e53935;
+  color: white;
+  width: 100%;
 }
 </style>
