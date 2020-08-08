@@ -27,7 +27,7 @@ export default class Hand extends Vue {
   cards: Array<WhiteCardModel> = this.$store.state.hand;
 
   addCard() {
-    this.$store.state.hand.push(new WhiteCardModel("asasd"));
+    this.$store.state.hand.push(this.$store.state.room.deck.whites.pop());
   }
 
   playWhite(white: WhiteCardModel) {

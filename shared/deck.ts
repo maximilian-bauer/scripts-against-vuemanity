@@ -14,7 +14,6 @@ export default class Deck {
         black.forEach(blackCards => this.blacks.push(new BlackCardModel(blackCards.text, blackCards.pick)));
         let white = deck.white.map((index: number) => CardsGerman.whiteCards[index]);
         white = this.shuffle(white);
-        console.log(white);
         white.forEach(whiteCards => this.whites.push(new WhiteCardModel(whiteCards)));
     }
 

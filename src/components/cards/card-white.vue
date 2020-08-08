@@ -26,7 +26,7 @@ export default class WhiteCard extends Vue {
   background-color: #ffffff;
 
   height: 140px;
-  width: 100px;
+  width: 104px;
 
   border-radius: 7px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
@@ -42,7 +42,7 @@ export default class WhiteCard extends Vue {
   font-size: 10pt;
   font-family: "Helvetica Neue", sans-serif;
   font-weight: bold;
-  word-wrap: break-word;
+  word-break: break-word;
   display: inline-block;
 }
 </style>
