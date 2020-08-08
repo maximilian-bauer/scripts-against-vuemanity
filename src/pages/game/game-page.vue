@@ -7,20 +7,18 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
-import Component from "vue-class-component";
+import Vue, { defineComponent } from "vue";
 import Board from "@/components/board/board.vue";
 import Hand from "@/components/hand/hand.vue";
 import Roster from "@/components/roster/roster.vue";
 
-@Component({
+export default defineComponent({
   components: {
     Board,
     Hand,
     Roster
   }
-})
-export default class GamePage extends Vue {}
+});
 </script>
 
 <style lang="less" scoped>

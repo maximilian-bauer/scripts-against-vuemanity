@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <div id="connection-banner" :hidden="connected">
+    <div id="connection-banner" :hidden="state.connected">
       Not connected to server
     </div>
     <router-view></router-view>
@@ -8,14 +8,17 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
+import { defineComponent, computed, ComputedRef, reactive } from 'vue';
+import { useStore, Store } from 'vuex';
 
-@Component({})
-export default class App extends Vue {
-  get connected() {
-    return this.$store.state.connected;
+export default defineComponent({
+  name: "App",
+  setup() {
+    const state = useStore().state;
+
+    return {state};
   }
-}
+})
 </script>
 
 <style lang="less">

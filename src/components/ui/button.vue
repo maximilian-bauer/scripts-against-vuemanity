@@ -1,19 +1,16 @@
 <template>
-  <button @click="emitClick">
+  <button>
     <slot />
   </button>
 </template>
 
-<script>
-import Vue from "vue";
-import Component from "vue-class-component";
+<script lang="ts">
+import { defineComponent } from 'vue';
 
-@Component
-export default class Button extends Vue {
-  emitClick() {
-    this.$emit("click");
-  }
-}
+
+export default defineComponent({
+  name: "Button"
+});
 </script>
 
 <style lang="less" scoped>

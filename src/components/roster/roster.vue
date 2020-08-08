@@ -1,28 +1,27 @@
 <template>
   <div class="roster">
     <h2 class="roster-title">Players</h2>
-    <PlayerInfo
-      v-for="player in players.values()"
-      :key="player.nickname"
-      :playerModel="player"
-    />
+    <PlayerInfo v-for="player in players.values()" :key="player.nickname" :playerModel="player" />
   </div>
 </template>
 
 <script lang="ts">
-import Vue from "vue";
-import Component from "vue-class-component";
+import { defineComponent } from "vue";
 import PlayerInfo from "./player-info.vue";
+import { useStore } from 'vuex';
+import PlayerModel from '../../../shared/player';
 
-@Component({
+export default defineComponent({
+  name: "Roster",
   components: {
     PlayerInfo
+  },
+  setup() {
+    const players: Map<string, PlayerModel> = useStore().state.room.players;
+
+    return { players };
   }
-})
-export default class Roster extends Vue {
-  // FIXME: does not work, because in Vue 2, Maps are not reactive
-  players = this.$store.state.room.players;
-}
+});
 </script>
 
 <style lang="less" scoped>

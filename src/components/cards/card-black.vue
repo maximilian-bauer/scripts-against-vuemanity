@@ -6,16 +6,15 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
-import Component from "vue-class-component";
+import { defineComponent } from "vue";
 import BlackCardModel from "../../../shared/card-black";
 
-@Component({
+export default defineComponent({
+  name: "CardBlack",
   props: {
     cardModel: BlackCardModel
   }
-})
-export default class BlackCard extends Vue {}
+});
 </script>
 
 <style lang="less" scoped>
