@@ -1,13 +1,9 @@
 import StartPage from "@/pages/start/start-page.vue";
 import GamePage from "@/pages/game/game-page.vue";
-import Vue from "vue";
-import Router, { Route } from "vue-router";
-import VueRouter from "vue-router";
+import {createRouter, createWebHistory, RouteLocationNormalized} from "vue-router";
 import store from "../store";
 
-Vue.use(VueRouter);
-
-function gameGuard(to: Route, from: Route, next: Function) {
+function gameGuard(to: RouteLocationNormalized, from: RouteLocationNormalized, next: Function) {
   if (store.state.room == undefined) {
     next("/start");
   } else {
@@ -15,9 +11,8 @@ function gameGuard(to: Route, from: Route, next: Function) {
   }
 }
 
-const router = new Router({
-  mode: "history",
-  base: "/",
+const router = createRouter({
+  history: createWebHistory(),
   routes: [
     {
       path: "/start",
@@ -31,7 +26,7 @@ const router = new Router({
       name: "game"
     },
     {
-      path: "*",
+      path: "/:catchAll(.*)",
       redirect: "/start"
     }
   ]

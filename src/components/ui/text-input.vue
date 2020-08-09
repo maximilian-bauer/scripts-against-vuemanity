@@ -7,24 +7,29 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
-import Component from "vue-class-component";
+import { defineComponent, SetupContext } from "vue";
 
-@Component({
+export default defineComponent({
+  name: "TextInput",
+  setup(props, context: SetupContext) {
+
+    function handleInput(e: InputEvent) {
+      const target = e.target as HTMLInputElement;
+      if (target != null) {
+        context.emit("update:modelValue", target.value);
+      }
+    }
+
+    return { handleInput };
+  },
+
   props: {
     label: String,
     errorText: String,
     valid: Boolean
   }
-})
-export default class TextInput extends Vue {
-  handleInput(e: InputEvent) {
-    const target = e.target as HTMLInputElement;
-    if (target != null) {
-      this.$emit("input", target.value);
-    }
-  }
-}
+
+});
 </script>
 
 <style lang="less" scoped>

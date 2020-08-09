@@ -2,40 +2,42 @@
   <div id="hand" v-on:click="addCard">
     <h2 id="hand-title">Hand</h2>
     <div id="card-container">
-      <WhiteCard
-        v-for="card in cards"
-        :key="card.text"
-        :cardModel="card"
-        @click="playWhite(card)"
-      />
+      <WhiteCard v-for="card in cards" :key="card.text" :cardModel="card" @click="playWhite(card)" />
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
-import Component from "vue-class-component";
+import { defineComponent, reactive } from "vue";
 import WhiteCard from "@/components/cards/card-white.vue";
 import WhiteCardModel from "../../../shared/card-white";
+import { useStore, Store } from 'vuex';
 
-@Component({
+export default defineComponent({
+  name: "Hand",
   components: {
     WhiteCard
-  }
-})
-export default class Hand extends Vue {
-  cards: Array<WhiteCardModel> = this.$store.state.hand;
+  },
+  setup() {
+    const store: Store<any> = useStore();
+    const cards: Array<WhiteCardModel> = reactive(store.state.hand);
 
-  addCard() {
-    this.$store.state.hand.push(this.$store.state.room.deck.whites.pop());
+    // Only for testing. Modifying the state directly is discouraged.
+    function addCard() {
+      store.state.hand.push(store.state.room.deck.whites.pop());
+    }
+
+    function playWhite(white: WhiteCardModel) {
+      white.player = store.getters.getNickname;
+
+      store.dispatch("playWhite", white);
+    }
+
+    return { cards, addCard, playWhite };
   }
 
-  playWhite(white: WhiteCardModel) {
-    white.player = this.$store.getters.getNickname;
-
-    this.$store.dispatch("playWhite", white);
-  }
-}
+});
 </script>
 
 <style lang="less" scoped>

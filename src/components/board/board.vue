@@ -5,33 +5,31 @@
       <BlackCard id="black" :cardModel="black" />
     </div>
     <div id="white-container" class="card-container">
-      <WhiteCard
-        class="white"
-        v-for="white in whites"
-        :key="white.text"
-        :cardModel="white"
-      />
+      <WhiteCard class="white" v-for="white in whites" :key="white.text" :cardModel="white" />
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import Vue from "vue";
-import Component from "vue-class-component";
+import { ref, defineComponent } from "vue";
+import { useStore } from "vuex";
 import BlackCard from "@/components/cards/card-black.vue";
 import WhiteCard from "@/components/cards/card-white.vue";
 import BlackCardModel from "../../../shared/card-black";
 
-@Component({
+export default defineComponent({
+  name: "Board",
   components: {
     BlackCard,
     WhiteCard
+  },
+  setup() {
+    const black = new BlackCardModel("text", 1); //this.$store.state.room.board.black;
+    const whites = ref(useStore().state.room.board.whites);
+
+    return { black, whites };
   }
-})
-export default class Board extends Vue {
-  black = new BlackCardModel("text", 1); //this.$store.state.room.board.black;
-  whites = this.$store.state.room.board.whites;
-}
+});
 </script>
 
 <style lang="less" scoped>

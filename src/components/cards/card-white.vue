@@ -1,24 +1,19 @@
 <template>
-  <div class="card-white" @click="emitClick">
+  <div class="card-white">
     <span class="text-white">{{ cardModel.text }}</span>
   </div>
 </template>
 
 <script lang="ts">
-import Vue from "vue";
-import Component from "vue-class-component";
+import Vue, { defineComponent, SetupContext } from "vue";
 import WhiteCardModel from "../../../shared/card-white";
 
-@Component({
+export default defineComponent({
+  name: "CardWhite",
   props: {
     cardModel: WhiteCardModel
   }
-})
-export default class WhiteCard extends Vue {
-  emitClick() {
-    this.$emit("click");
-  }
-}
+});
 </script>
 
 <style lang="less" scoped>

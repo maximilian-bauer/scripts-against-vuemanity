@@ -9,10 +9,8 @@ export default {
     context.commit("SET_NICKNAME", nickname);
   },
 
-  setSocket(
-    context: ActionContext<State, State>,
-    socket: SocketIOClient.Socket
-  ) {
+  setSocket(context: ActionContext<State, State>, socket: SocketIOClient.Socket) {
+    console.log("setSocket")
     context.commit("SET_SOCKET", socket);
   },
 
@@ -24,10 +22,7 @@ export default {
     context.commit("SET_ROOM", room);
   },
 
-  setPlayers(
-    context: ActionContext<State, State>,
-    players: Map<string, PlayerModel>
-  ) {
+  setPlayers(context: ActionContext<State, State>, players: Map<string, PlayerModel>) {
     context.commit("SET_PLAYERS", players);
   },
 

@@ -6,7 +6,7 @@
       ref="nameInput"
       label="Name"
       id="name-input"
-      v-model="name"
+      v-model.trim="nickname"
       @input="resetInputValidity"
       :valid="nameInputValid"
       :errorText="nameInputErrorText"
@@ -15,7 +15,7 @@
       ref="roomInput"
       label="Room"
       id="room-input"
-      v-model="room"
+      v-model.trim="roomID"
       @input="resetInputValidity"
       :valid="roomInputValid"
       :errorText="roomInputErrorText"
@@ -27,8 +27,7 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
-import Component from "vue-class-component";
+import { ref, Ref, reactive, defineComponent, SetupContext } from "vue";
 import TextInput from "@/components/ui/text-input.vue";
 import Button from "@/components/ui/button.vue";
 
@@ -41,46 +40,64 @@ import PlayerModel from "../../../shared/player";
 
 import JoinRoomResponseType from "../../../shared/join-room-response-type";
 import CreateRoomResponseType from "../../../shared/create-room-response-type";
+import { useStore, Store } from "vuex";
+import { useRouter, Router } from "vue-router";
 
-@Component({
+export default defineComponent({
+  name: "StartPage",
   components: {
     TextInput,
     Button
-  }
-})
-export default class StartPage extends Vue {
-  appName: string = cfg.appName;
+  },
+  setup(props, context: SetupContext) {
+    const appName: string = cfg.appName;
 
-  name = "";
-  room = "";
+    const nickname: Ref<string> = ref("");
+    const roomID: Ref<string> = ref("");
 
-  nameInputValid = true;
-  nameInputErrorText = "";
+    const nameInputValid: Ref<boolean> = ref(true);
+    const nameInputErrorText: Ref<string> = ref("");
 
-  roomInputValid = true;
-  roomInputErrorText = "";
+    const roomInputValid: Ref<boolean> = ref(true);
+    const roomInputErrorText: Ref<string> = ref("");
 
-  joinReponseListenerActive = false;
-  createReponseListenerActive = false;
+    let joinReponseListenerActive = false;
+    let createReponseListenerActive = false;
 
-  get socket(): SocketIOClient.Socket {
-    return this.$store.getters.getSocket;
-  }
+    const store: Store<any> = useStore();
+    const state = store.state;
 
-  get connected(): boolean {
-    return this.$store.getters.getConnected;
-  }
+    const router: Router = useRouter();
 
-  joinRoom() {
-    console.log("join room");
+    function validateInput(): boolean {
+      let valid = true;
 
-    if (this.validateInput()) {
-      if (!this.joinReponseListenerActive) {
-        // HACK: room.players is a Map which cannot be stringified. Even when transmitting without stringifiying, this does not work.
-        // Thus players are sent separately as an array.
-        this.socket.once(
-          "joinRoomResponse",
-          (joinRoomResponseString: string) => {
+      if (nickname.value.length == 0) {
+        nameInputErrorText.value = "Input must not be empty.";
+        nameInputValid.value = false;
+        valid = false;
+      }
+
+      if (roomID.value.length == 0) {
+        roomInputErrorText.value = "Input must not be empty.";
+        roomInputValid.value = false;
+        valid = false;
+      }
+
+      return valid;
+    }
+
+    function resetInputValidity(): void {
+      nameInputValid.value = true;
+      roomInputValid.value = true;
+    }
+
+    function joinRoom() {
+      if (validateInput()) {
+        if (!joinReponseListenerActive) {
+          // HACK: room.players is a Map which cannot be stringified. Even when transmitting without stringifiying, this does not work.
+          // Thus players are sent separately as an array.
+          state.socket.once("joinRoomResponse", (joinRoomResponseString: string) => {
             const joinRoomResponse: {
               type: JoinRoomResponseType;
               room: RoomModel;
@@ -88,124 +105,82 @@ export default class StartPage extends Vue {
             } = JSON.parse(joinRoomResponseString);
 
             if (joinRoomResponse.type == JoinRoomResponseType.ACCEPT) {
-              this.$store.dispatch("setNickname", this.name);
+              store.dispatch("setNickname", nickname.value);
 
-              this.$store.dispatch("setRoom", joinRoomResponse.room);
+              store.dispatch("setRoom", joinRoomResponse.room);
 
               const players: Map<string, PlayerModel> = new Map();
               joinRoomResponse.players.forEach(arr =>
                 players.set(arr[0] as string, arr[1] as PlayerModel)
               );
-              this.$store.dispatch("setPlayers", players);
-
-              this.joinReponseListenerActive = false;
-              console.log("resp: " + joinRoomResponse.room.players.keys);
-              this.$router.push("game");
-            } else if (
-              joinRoomResponse.type ==
-              JoinRoomResponseType.DENY_ROOM_DOES_NOT_EXIST
-            ) {
-              this.roomInputErrorText = "A room with this name doesn't exist.";
-              this.roomInputValid = false;
-            } else if (
-              joinRoomResponse.type ==
-              JoinRoomResponseType.DENY_PLAYER_ALREADY_CONNECTED
-            ) {
-              this.nameInputErrorText =
-                "A player with this name is already active in this room.";
-              this.nameInputValid = false;
+              store.dispatch("setPlayers", players);
+              router.push("game");
+            } else if (joinRoomResponse.type == JoinRoomResponseType.DENY_ROOM_DOES_NOT_EXIST) {
+              roomInputErrorText.value = "A room with this name doesn't exist.";
+              roomInputValid.value = false;
+            } else if (joinRoomResponse.type == JoinRoomResponseType.DENY_PLAYER_ALREADY_CONNECTED) {
+              nameInputErrorText.value = "A player with this name is already active in this room.";
+              nameInputValid.value = false;
             }
+            joinReponseListenerActive = false;
           }
-        );
-        this.joinReponseListenerActive = true;
-      }
-      if (this.connected) {
-        const joinRoomRequest = {
-          nickname: this.name,
-          roomID: this.room
-        };
-        this.socket.emit("joinRoomRequest", JSON.stringify(joinRoomRequest));
+          );
+          joinReponseListenerActive = true;
+        }
+        if (state.connected) {
+          const joinRoomRequest = {
+            nickname: nickname.value,
+            roomID: roomID.value
+          };
+          state.socket.emit("joinRoomRequest", JSON.stringify(joinRoomRequest));
+        }
       }
     }
-  }
 
-  createRoom() {
-    console.log("create room");
+    function createRoom() {
+      console.log("create room");
 
-    if (this.validateInput()) {
-      if (!this.createReponseListenerActive) {
-        this.socket.once(
-          "createRoomResponse",
-          (createRoomResponse: CreateRoomResponseType) => {
+      if (validateInput()) {
+        if (!createReponseListenerActive) {
+          state.socket.once("createRoomResponse", (createRoomResponse: CreateRoomResponseType) => {
             if (createRoomResponse == CreateRoomResponseType.ACCEPT) {
               // TODO: create page for choosing room options
               const optionsMessage = {
-                roomID: this.room,
+                roomID: roomID.value,
                 options: new RoomOptions(true, 5)
               };
 
-              this.socket.emit(
-                "changeRoomOptions",
-                JSON.stringify(optionsMessage)
-              );
+              state.socket.emit("changeRoomOptions", JSON.stringify(optionsMessage));
 
-              this.$store.dispatch("setNickname", this.name);
+              store.dispatch("setNickname", nickname.value);
 
-              const room = new RoomModel(this.room, new PlayerModel(this.name));
-              this.$store.dispatch("setRoom", room);
+              const room = new RoomModel(roomID.value, new PlayerModel(nickname.value));
+              store.dispatch("setRoom", room);
 
-              this.createReponseListenerActive = false;
-
-              this.$router.push("game");
-            } else if (
-              createRoomResponse ==
-              CreateRoomResponseType.DENY_ROOM_ALREADY_EXISTS
-            ) {
-              this.roomInputErrorText = "A room with this name already exists.";
-              this.roomInputValid = false;
+              router.push("game");
+            } else if (createRoomResponse == CreateRoomResponseType.DENY_ROOM_ALREADY_EXISTS) {
+              roomInputErrorText.value = "A room with this name already exists.";
+              roomInputValid.value = false;
             }
-          }
-        );
+            createReponseListenerActive = false;
+          });
 
-        this.createReponseListenerActive = true;
-      }
+          createReponseListenerActive = true;
+        }
 
-      if (this.connected) {
-        const createRoomRequest: object = {
-          nickname: this.name,
-          roomID: this.room
-        };
-        this.socket.emit(
-          "createRoomRequest",
-          JSON.stringify(createRoomRequest)
-        );
+        if (state.connected) {
+          const createRoomRequest: object = {
+            nickname: nickname.value,
+            roomID: roomID.value
+          };
+          state.socket.emit("createRoomRequest", JSON.stringify(createRoomRequest));
+        }
       }
     }
+
+    return { appName, nickname, roomID, nameInputValid, roomInputValid, nameInputErrorText, roomInputErrorText, resetInputValidity, joinRoom, createRoom };
   }
-
-  validateInput(): boolean {
-    let valid = true;
-
-    if (!(Boolean(this.name) && this.name.trim().length != 0)) {
-      this.nameInputErrorText = "Input must not be empty.";
-      this.nameInputValid = false;
-      valid = false;
-    }
-
-    if (!(Boolean(this.room) && this.room.trim().length != 0)) {
-      this.roomInputErrorText = "Input must not be empty.";
-      this.roomInputValid = false;
-      valid = false;
-    }
-
-    return valid;
-  }
-
-  resetInputValidity(): void {
-    this.nameInputValid = true;
-    this.roomInputValid = true;
-  }
-}
+});
 </script>
 
 <style lang="less" scoped>
@@ -229,7 +204,7 @@ export default class StartPage extends Vue {
   margin-right: auto;
 }
 
-.text-input /deep/ .label {
+.text-input::v-deep .label {
   color: #ffffff;
 }
 
