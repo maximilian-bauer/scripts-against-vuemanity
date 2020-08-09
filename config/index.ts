@@ -1,9 +1,9 @@
 
-export default class Config{
+export default class Config {
     
     public appName = "Scripts Against Vuemanity"
 
-    public wsServerUrl = "ws://192.168.178.46:3000";
+    public wsServerUrl = "ws://localhost:3000";
 
     public wsOptions = {    
         reconnection: true,
