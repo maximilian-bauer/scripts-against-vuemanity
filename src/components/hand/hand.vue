@@ -23,8 +23,9 @@ export default defineComponent({
     const store: Store<any> = useStore();
     const cards: Array<WhiteCardModel> = reactive(store.state.hand);
 
+    // Only for testing. Modifying the state directly is discouraged.
     function addCard() {
-      store.state.hand.push(new WhiteCardModel("asasd"));
+      store.state.hand.push(store.state.room.deck.whites.pop());
     }
 
     function playWhite(white: WhiteCardModel) {

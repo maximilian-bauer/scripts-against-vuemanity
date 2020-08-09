@@ -28,7 +28,7 @@ export default defineComponent({
   flex-flow: column wrap;
   justify-content: center;
 
-  max-width: 1000px;
+  max-width: 1010px;
   align-items: center;
 }
 
