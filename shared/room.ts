@@ -2,14 +2,14 @@ import BoardModel from "./board";
 import GamePhase from "./game-phase"
 import PlayerModel from "./player"
 import RoomOptions from "./room-options"
-import deck from "./deck";
+import Deck from "./deck";
 
-export default class RoomModel {  
+export default class RoomModel {
 
   id: string;
 
   players: Map<string, PlayerModel> = new Map();
-  
+
   phase: GamePhase;
 
   czar?: string;
@@ -18,7 +18,7 @@ export default class RoomModel {
 
   board: BoardModel = new BoardModel();
 
-  deck: deck = new deck();
+  deck: Deck = new Deck();
 
   constructor(id: string, initialPlayer: PlayerModel) {
     this.phase = GamePhase.SELECTING_OPTIONS;
