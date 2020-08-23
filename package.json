@@ -6,7 +6,7 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "server": "cd ./server/ && rm -rf ./build && tsc && node ./build/server/index.js",
+    "server": "cd ./server/ && rm -rf ./build && tsc && cd ./build/ && node ./server/index.js",
     "ui": "vue ui"
   },
   "dependencies": {
