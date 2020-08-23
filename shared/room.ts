@@ -2,7 +2,6 @@ import BoardModel from "./board";
 import GamePhase from "./game-phase"
 import PlayerModel from "./player"
 import RoomOptions from "./room-options"
-import Deck from "./deck";
 
 export default class RoomModel {
 
@@ -17,8 +16,6 @@ export default class RoomModel {
   options?: RoomOptions;
 
   board: BoardModel = new BoardModel();
-
-  deck: Deck = new Deck();
 
   constructor(id: string, initialPlayer: PlayerModel) {
     this.phase = GamePhase.SELECTING_OPTIONS;
