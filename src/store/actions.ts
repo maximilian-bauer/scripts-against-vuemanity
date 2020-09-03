@@ -43,5 +43,10 @@ export default {
       };
       context.state.socket?.emit("playWhite", JSON.stringify(message));
     }
+  },
+
+  addWhites(context: ActionContext<State, State>, whites: WhiteCardModel[]) {
+    context.commit("ADD_WHITES", whites);
   }
+
 };
