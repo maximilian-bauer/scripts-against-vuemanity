@@ -5,6 +5,7 @@ import State from "../state";
 
 import io from "socket.io-client";
 import PlayerModel from "shared/player";
+import WhiteCardModel from "shared/card-white";
 
 function setupWS(store: Store<State>): void {
   console.log("Trying to connect WebSocket on " + cfg.wsServerUrl);
@@ -31,8 +32,13 @@ function setupWS(store: Store<State>): void {
     const player: PlayerModel = JSON.parse(playerDisconnectMessage);
     store.dispatch("updatePlayer", player);
   });
+  
+  socket.on("dealWhites", (whitesMessage: string) => {
+    const whites: WhiteCardModel[] = JSON.parse(whitesMessage);
+    console.log(whites);
+    store.dispatch("addWhites", whites);
+  });
 }
-
 export default function createWebSocketPlugin() {
   return (store: Store<State>) => {
     setupWS(store);
