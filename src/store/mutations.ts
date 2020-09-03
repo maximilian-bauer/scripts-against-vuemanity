@@ -18,8 +18,6 @@ export default {
 
   SET_ROOM(state: State, room: RoomModel) {
     state.room = room;
-    // Whenever the players room is changed, his hand is changed to new cards from the deck of the target room.
-    state.hand = room.deck.whites.splice(0,7);
   },
 
   SET_PLAYERS(state: State, players: Map<string, PlayerModel>) {
@@ -39,4 +37,7 @@ export default {
     state.hand.splice(state.hand.indexOf(white), 1);
   },
 
+  ADD_WHITES(state: State, whites: WhiteCardModel[]) {
+    state.hand.push(...whites);
+  }
 };

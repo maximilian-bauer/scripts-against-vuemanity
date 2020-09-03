@@ -7,7 +7,7 @@ export default class State {
   public socket?: SocketIOClient.Socket;
   public connected = false;
 
-  public hand: Array<WhiteCardModel> = [new WhiteCardModel("text")];
+  public hand: Array<WhiteCardModel> = [];
 
   public room?: RoomModel;
 }

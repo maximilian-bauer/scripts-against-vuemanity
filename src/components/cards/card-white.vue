@@ -5,13 +5,13 @@
 </template>
 
 <script lang="ts">
-import Vue, { defineComponent, SetupContext } from "vue";
+import Vue, { defineComponent, SetupContext, ref} from "vue";
 import WhiteCardModel from "../../../shared/card-white";
 
 export default defineComponent({
   name: "CardWhite",
   props: {
-    cardModel: WhiteCardModel
+    cardModel: ref(WhiteCardModel)
   }
 });
 </script>

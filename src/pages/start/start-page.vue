@@ -37,11 +37,13 @@ const cfg: Config = new Config();
 import RoomOptions from "../../../shared/room-options";
 import RoomModel from "../../../shared/room";
 import PlayerModel from "../../../shared/player";
+import WhiteCardModel from "../../../shared/card-white";
 
 import JoinRoomResponseType from "../../../shared/join-room-response-type";
 import CreateRoomResponseType from "../../../shared/create-room-response-type";
 import { useStore, Store } from "vuex";
 import { useRouter, Router } from "vue-router";
+import State from '../../store/state';
 
 export default defineComponent({
   name: "StartPage",
@@ -65,7 +67,7 @@ export default defineComponent({
     let createReponseListenerActive = false;
 
     const store: Store<any> = useStore();
-    const state = store.state;
+    const state: State = store.state;
 
     const router: Router = useRouter();
 
@@ -97,11 +99,12 @@ export default defineComponent({
         if (!joinReponseListenerActive) {
           // HACK: room.players is a Map which cannot be stringified. Even when transmitting without stringifiying, this does not work.
           // Thus players are sent separately as an array.
-          state.socket.once("joinRoomResponse", (joinRoomResponseString: string) => {
+          state.socket!.once("joinRoomResponse", (joinRoomResponseString: string) => {
             const joinRoomResponse: {
               type: JoinRoomResponseType;
               room: RoomModel;
               players: Array<Array<string | PlayerModel>>;
+              hand?: WhiteCardModel[] // if the player was already connected the hand is passed to keep a persistent state across reconnects
             } = JSON.parse(joinRoomResponseString);
 
             if (joinRoomResponse.type == JoinRoomResponseType.ACCEPT) {
@@ -111,8 +114,12 @@ export default defineComponent({
 
               const players: Map<string, PlayerModel> = new Map();
               joinRoomResponse.players.forEach(arr =>
-                players.set(arr[0] as string, arr[1] as PlayerModel)
+                players.set(arr[0] as string, arr[1] as PlayerModel) 
               );
+
+              if(joinRoomResponse.hand !== undefined) {
+                store.dispatch("addWhites", joinRoomResponse.hand);
+              }
               store.dispatch("setPlayers", players);
               router.push("game");
             } else if (joinRoomResponse.type == JoinRoomResponseType.DENY_ROOM_DOES_NOT_EXIST) {
@@ -132,7 +139,7 @@ export default defineComponent({
             nickname: nickname.value,
             roomID: roomID.value
           };
-          state.socket.emit("joinRoomRequest", JSON.stringify(joinRoomRequest));
+          state.socket!.emit("joinRoomRequest", JSON.stringify(joinRoomRequest));
         }
       }
     }
@@ -141,20 +148,21 @@ export default defineComponent({
       console.log("create room");
 
       if (validateInput()) {
-        if (!createReponseListenerActive) {
-          state.socket.once("createRoomResponse", (createRoomResponse: CreateRoomResponseType) => {
+        if (!createReponseListenerActive && state.connected) {
+          state.socket!.once("createRoomResponse", (createRoomResponse: CreateRoomResponseType) => {
             if (createRoomResponse == CreateRoomResponseType.ACCEPT) {
               // TODO: create page for choosing room options
               const optionsMessage = {
                 roomID: roomID.value,
-                options: new RoomOptions(true, 5)
+                options: new RoomOptions(["German cards"], 5, true, 5)
               };
 
-              state.socket.emit("changeRoomOptions", JSON.stringify(optionsMessage));
+              state.socket!.emit("changeRoomOptions", JSON.stringify(optionsMessage));
 
               store.dispatch("setNickname", nickname.value);
 
               const room = new RoomModel(roomID.value, new PlayerModel(nickname.value));
+              room.options = new RoomOptions(["German cards"], 10, true, 5);
               store.dispatch("setRoom", room);
 
               router.push("game");
@@ -173,7 +181,7 @@ export default defineComponent({
             nickname: nickname.value,
             roomID: roomID.value
           };
-          state.socket.emit("createRoomRequest", JSON.stringify(createRoomRequest));
+          state.socket!.emit("createRoomRequest", JSON.stringify(createRoomRequest));
         }
       }
     }
