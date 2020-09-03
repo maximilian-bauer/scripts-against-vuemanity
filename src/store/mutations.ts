@@ -37,7 +37,11 @@ export default {
     state.hand.splice(state.hand.indexOf(white), 1);
   },
 
-  ADD_WHITES(state: State, whites: WhiteCardModel[]) {
+  REPLENISH_HAND(state: State, whites: WhiteCardModel[]) {
     state.hand.push(...whites);
+  },
+
+  WHITE_PLAYED(state: State, white: WhiteCardModel) {
+    state.room?.board.whites.push(white);
   }
 };

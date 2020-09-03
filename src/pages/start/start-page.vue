@@ -118,7 +118,7 @@ export default defineComponent({
               );
 
               if(joinRoomResponse.hand !== undefined) {
-                store.dispatch("addWhites", joinRoomResponse.hand);
+                store.dispatch("replenishHand", joinRoomResponse.hand);
               }
               store.dispatch("setPlayers", players);
               router.push("game");
