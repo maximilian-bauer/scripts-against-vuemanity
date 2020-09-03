@@ -1,6 +1,7 @@
 import State from "./state/state";
 import BasicMessageHandler from "./message-handlers/basic-message-handler";
 import RoomMessageHandler from "./message-handlers/room-message-handler";
+import CardMessageHandler from "./message-handlers/card-message-handler";
 
 const app = require('express')();
 const http = require('http').Server(app);
@@ -16,6 +17,7 @@ socketIOServer.on('connection', (socket: SocketIO.Socket) => {
   
   const basicHandler = new BasicMessageHandler(socket);
   const roomHandler = new RoomMessageHandler(socket);
+  const cardHandler = new CardMessageHandler(socket);
   
   socket.emit('roomNames', Array.from(State.instance.rooms.keys()));
 
