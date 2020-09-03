@@ -20,11 +20,11 @@ export default class ServerRoomModel extends RoomModel {
 
     const deckNames: string[] | undefined = this.options?.decks;
 
-    if(deckNames !== undefined) {
+    if (deckNames !== undefined) {
       // add all decks to this room
       deckNames.forEach(deckName => {
         const deckToAdd: DeckModel | undefined = State.instance.deckMap.get(deckName);
-        if(deckToAdd !== undefined){
+        if (deckToAdd !== undefined) {
           this.deck!.addDeck(deckToAdd);
         }
       });

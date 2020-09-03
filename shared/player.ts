@@ -1,6 +1,6 @@
 export default class PlayerModel {
   nickname: string;
-  
+
   points: number;
 
   connected: boolean;

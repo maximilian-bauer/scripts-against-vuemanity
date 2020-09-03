@@ -16,7 +16,7 @@ export default class BasicMessageHandler {
       } else {
         console.warn("Room or player undefined. Cannot properly disconnect client.");
       }
-      
+
     });
 
     socket.on('message', (message: string) => {

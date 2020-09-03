@@ -15,7 +15,7 @@ http.listen(3000, () => {
 socketIOServer.on('connection', (socket: SocketIO.Socket) => {
 
   console.log("User connected.");
-  
+
   const basicHandler = new BasicMessageHandler(socket);
   const roomHandler = new RoomMessageHandler(socket);
   const cardHandler = new CardMessageHandler(socket);

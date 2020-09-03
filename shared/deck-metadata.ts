@@ -9,5 +9,5 @@ export default class DeckMetadata {
     this.nsfw = nsfw;
     this.icon = icon;
     this.groups = groups;
-  } 
+  }
 }

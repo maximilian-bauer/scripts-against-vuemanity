@@ -5,7 +5,7 @@
 </template>
 
 <script lang="ts">
-import Vue, { defineComponent, SetupContext, ref} from "vue";
+import Vue, { defineComponent, SetupContext, ref } from "vue";
 import WhiteCardModel from "../../../shared/card-white";
 
 export default defineComponent({

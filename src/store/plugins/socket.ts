@@ -32,7 +32,7 @@ function setupWS(store: Store<State>): void {
     const player: PlayerModel = JSON.parse(playerDisconnectMessage);
     store.dispatch("updatePlayer", player);
   });
-  
+
   socket.on("dealWhites", (whitesMessage: string) => {
     const whites: WhiteCardModel[] = JSON.parse(whitesMessage);
     console.log(whites);

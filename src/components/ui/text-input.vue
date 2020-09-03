@@ -12,7 +12,6 @@ import { defineComponent, SetupContext } from "vue";
 export default defineComponent({
   name: "TextInput",
   setup(props, context: SetupContext) {
-
     function handleInput(e: InputEvent) {
       const target = e.target as HTMLInputElement;
       if (target != null) {
@@ -28,7 +27,6 @@ export default defineComponent({
     errorText: String,
     valid: Boolean
   }
-
 });
 </script>
 

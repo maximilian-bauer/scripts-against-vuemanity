@@ -17,11 +17,11 @@ export default class DeckModel {
         this.blacks.push(...deckToAdd.blacks);
         this.whites.push(...deckToAdd.whites);
 
-        if(this.metadata == undefined) {
+        if (this.metadata == undefined) {
             this.metadata = new DeckMetadata("multiple", false, "multiple", [])
         }
 
-        if(deckToAdd.metadata!.nsfw) {
+        if (deckToAdd.metadata!.nsfw) {
             this.metadata.nsfw = true;
         }
     }
@@ -30,7 +30,7 @@ export default class DeckModel {
         return this.blacks.pop();
     }
 
-    drawWhites(amount: number): WhiteCardModel[]{
+    drawWhites(amount: number): WhiteCardModel[] {
         return this.whites.splice(this.whites.length - amount);
     }
 }
