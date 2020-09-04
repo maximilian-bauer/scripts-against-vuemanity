@@ -32,13 +32,20 @@ function setupWS(store: Store<State>): void {
     const player: PlayerModel = JSON.parse(playerDisconnectMessage);
     store.dispatch("updatePlayer", player);
   });
-  
+
   socket.on("dealWhites", (whitesMessage: string) => {
     const whites: WhiteCardModel[] = JSON.parse(whitesMessage);
     console.log(whites);
-    store.dispatch("addWhites", whites);
+    store.dispatch("replenishHand", whites);
+  });
+
+  socket.on("whitePlayed", (whiteMessage: string) => {
+    const white = JSON.parse(whiteMessage);
+    console.log("white played: " + whiteMessage);
+    store.dispatch("whitePlayed", white)
   });
 }
+
 export default function createWebSocketPlugin() {
   return (store: Store<State>) => {
     setupWS(store);

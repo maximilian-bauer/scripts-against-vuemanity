@@ -3,7 +3,9 @@
         "name": "German cards",
         "nsfw": true,
         "icon": "german-deck-icon",
-        "groups": [ "german-decks" ]
+        "groups": [
+            "german-decks"
+        ]
     },
     "blacks": [
         {

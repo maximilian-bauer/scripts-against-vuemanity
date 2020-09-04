@@ -8,17 +8,17 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, ComputedRef, reactive } from 'vue';
-import { useStore, Store } from 'vuex';
+import { defineComponent } from "vue";
+import { useStore } from "vuex";
 
 export default defineComponent({
   name: "App",
   setup() {
     const state = useStore().state;
 
-    return {state};
+    return { state };
   }
-})
+});
 </script>
 
 <style lang="less">

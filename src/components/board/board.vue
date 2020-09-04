@@ -5,7 +5,12 @@
       <BlackCard id="black" :cardModel="black" />
     </div>
     <div id="white-container" class="card-container">
-      <WhiteCard class="white" v-for="white in whites" :key="white.text" :cardModel="white" />
+      <WhiteCard
+        class="white"
+        v-for="white in whites"
+        :key="white.text"
+        :cardModel="white"
+      />
     </div>
   </div>
 </template>

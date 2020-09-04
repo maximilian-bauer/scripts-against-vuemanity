@@ -43,7 +43,7 @@ import JoinRoomResponseType from "../../../shared/join-room-response-type";
 import CreateRoomResponseType from "../../../shared/create-room-response-type";
 import { useStore, Store } from "vuex";
 import { useRouter, Router } from "vue-router";
-import State from '../../store/state';
+import State from "../../store/state";
 
 export default defineComponent({
   name: "StartPage",
@@ -99,38 +99,48 @@ export default defineComponent({
         if (!joinReponseListenerActive) {
           // HACK: room.players is a Map which cannot be stringified. Even when transmitting without stringifiying, this does not work.
           // Thus players are sent separately as an array.
-          state.socket!.once("joinRoomResponse", (joinRoomResponseString: string) => {
-            const joinRoomResponse: {
-              type: JoinRoomResponseType;
-              room: RoomModel;
-              players: Array<Array<string | PlayerModel>>;
-              hand?: WhiteCardModel[] // if the player was already connected the hand is passed to keep a persistent state across reconnects
-            } = JSON.parse(joinRoomResponseString);
+          state.socket!.once(
+            "joinRoomResponse",
+            (joinRoomResponseString: string) => {
+              const joinRoomResponse: {
+                type: JoinRoomResponseType;
+                room: RoomModel;
+                players: Array<Array<string | PlayerModel>>;
+                hand?: WhiteCardModel[]; // if the player was already connected the hand is passed to keep a persistent state across reconnects
+              } = JSON.parse(joinRoomResponseString);
 
-            if (joinRoomResponse.type == JoinRoomResponseType.ACCEPT) {
-              store.dispatch("setNickname", nickname.value);
+              if (joinRoomResponse.type == JoinRoomResponseType.ACCEPT) {
+                store.dispatch("setNickname", nickname.value);
 
-              store.dispatch("setRoom", joinRoomResponse.room);
+                store.dispatch("setRoom", joinRoomResponse.room);
 
-              const players: Map<string, PlayerModel> = new Map();
-              joinRoomResponse.players.forEach(arr =>
-                players.set(arr[0] as string, arr[1] as PlayerModel) 
-              );
+                const players: Map<string, PlayerModel> = new Map();
+                joinRoomResponse.players.forEach(arr =>
+                  players.set(arr[0] as string, arr[1] as PlayerModel)
+                );
 
-              if(joinRoomResponse.hand !== undefined) {
-                store.dispatch("addWhites", joinRoomResponse.hand);
+                if (joinRoomResponse.hand !== undefined) {
+                  store.dispatch("replenishHand", joinRoomResponse.hand);
+                }
+                store.dispatch("setPlayers", players);
+                router.push("game");
+              } else if (
+                joinRoomResponse.type ==
+                JoinRoomResponseType.DENY_ROOM_DOES_NOT_EXIST
+              ) {
+                roomInputErrorText.value =
+                  "A room with this name doesn't exist.";
+                roomInputValid.value = false;
+              } else if (
+                joinRoomResponse.type ==
+                JoinRoomResponseType.DENY_PLAYER_ALREADY_CONNECTED
+              ) {
+                nameInputErrorText.value =
+                  "A player with this name is already active in this room.";
+                nameInputValid.value = false;
               }
-              store.dispatch("setPlayers", players);
-              router.push("game");
-            } else if (joinRoomResponse.type == JoinRoomResponseType.DENY_ROOM_DOES_NOT_EXIST) {
-              roomInputErrorText.value = "A room with this name doesn't exist.";
-              roomInputValid.value = false;
-            } else if (joinRoomResponse.type == JoinRoomResponseType.DENY_PLAYER_ALREADY_CONNECTED) {
-              nameInputErrorText.value = "A player with this name is already active in this room.";
-              nameInputValid.value = false;
+              joinReponseListenerActive = false;
             }
-            joinReponseListenerActive = false;
-          }
           );
           joinReponseListenerActive = true;
         }
@@ -139,7 +149,10 @@ export default defineComponent({
             nickname: nickname.value,
             roomID: roomID.value
           };
-          state.socket!.emit("joinRoomRequest", JSON.stringify(joinRoomRequest));
+          state.socket!.emit(
+            "joinRoomRequest",
+            JSON.stringify(joinRoomRequest)
+          );
         }
       }
     }
@@ -149,29 +162,42 @@ export default defineComponent({
 
       if (validateInput()) {
         if (!createReponseListenerActive && state.connected) {
-          state.socket!.once("createRoomResponse", (createRoomResponse: CreateRoomResponseType) => {
-            if (createRoomResponse == CreateRoomResponseType.ACCEPT) {
-              // TODO: create page for choosing room options
-              const optionsMessage = {
-                roomID: roomID.value,
-                options: new RoomOptions(["German cards"], 5, true, 5)
-              };
+          state.socket!.once(
+            "createRoomResponse",
+            (createRoomResponse: CreateRoomResponseType) => {
+              if (createRoomResponse == CreateRoomResponseType.ACCEPT) {
+                // TODO: create page for choosing room options
+                const optionsMessage = {
+                  roomID: roomID.value,
+                  options: new RoomOptions(["German cards"], 5, true, 5)
+                };
 
-              state.socket!.emit("changeRoomOptions", JSON.stringify(optionsMessage));
+                state.socket!.emit(
+                  "changeRoomOptions",
+                  JSON.stringify(optionsMessage)
+                );
 
-              store.dispatch("setNickname", nickname.value);
+                store.dispatch("setNickname", nickname.value);
 
-              const room = new RoomModel(roomID.value, new PlayerModel(nickname.value));
-              room.options = new RoomOptions(["German cards"], 10, true, 5);
-              store.dispatch("setRoom", room);
+                const room = new RoomModel(
+                  roomID.value,
+                  new PlayerModel(nickname.value)
+                );
+                room.options = new RoomOptions(["German cards"], 10, true, 5);
+                store.dispatch("setRoom", room);
 
-              router.push("game");
-            } else if (createRoomResponse == CreateRoomResponseType.DENY_ROOM_ALREADY_EXISTS) {
-              roomInputErrorText.value = "A room with this name already exists.";
-              roomInputValid.value = false;
+                router.push("game");
+              } else if (
+                createRoomResponse ==
+                CreateRoomResponseType.DENY_ROOM_ALREADY_EXISTS
+              ) {
+                roomInputErrorText.value =
+                  "A room with this name already exists.";
+                roomInputValid.value = false;
+              }
+              createReponseListenerActive = false;
             }
-            createReponseListenerActive = false;
-          });
+          );
 
           createReponseListenerActive = true;
         }
@@ -181,12 +207,26 @@ export default defineComponent({
             nickname: nickname.value,
             roomID: roomID.value
           };
-          state.socket!.emit("createRoomRequest", JSON.stringify(createRoomRequest));
+          state.socket!.emit(
+            "createRoomRequest",
+            JSON.stringify(createRoomRequest)
+          );
         }
       }
     }
 
-    return { appName, nickname, roomID, nameInputValid, roomInputValid, nameInputErrorText, roomInputErrorText, resetInputValidity, joinRoom, createRoom };
+    return {
+      appName,
+      nickname,
+      roomID,
+      nameInputValid,
+      roomInputValid,
+      nameInputErrorText,
+      roomInputErrorText,
+      resetInputValidity,
+      joinRoom,
+      createRoom
+    };
   }
 });
 </script>

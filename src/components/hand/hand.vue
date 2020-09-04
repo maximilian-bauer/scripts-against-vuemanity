@@ -2,7 +2,12 @@
   <div id="hand">
     <h2 id="hand-title">Hand</h2>
     <div id="card-container">
-      <WhiteCard v-for="card in cards" :key="card.text" :cardModel="card" @click="playWhite(card)" />
+      <WhiteCard
+        v-for="card in cards"
+        :key="card.text"
+        :cardModel="card"
+        @click="playWhite(card)"
+      />
     </div>
     <Button v-on:click="replenishHand">Replenish hand</Button>
   </div>
@@ -14,8 +19,8 @@ import { defineComponent, reactive } from "vue";
 import WhiteCard from "@/components/cards/card-white.vue";
 import Button from "@/components/ui/button.vue";
 import WhiteCardModel from "../../../shared/card-white";
-import { useStore, Store } from 'vuex';
-import State from '../../store/state';
+import { useStore, Store } from "vuex";
+import State from "../../store/state";
 
 export default defineComponent({
   name: "Hand",
@@ -39,14 +44,13 @@ export default defineComponent({
     // TODO: Temporary function, only for testing. Once the neccessary logic is implemented, the server will decide, when to deal cards.
     // Same goes for the replenish button.
     function replenishHand() {
-      if(state.connected) {
+      if (state.connected) {
         state.socket!.emit("drawWhites");
       }
     }
 
     return { cards, playWhite, replenishHand };
   }
-
 });
 </script>
 

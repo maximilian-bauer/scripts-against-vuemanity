@@ -45,8 +45,12 @@ export default {
     }
   },
 
-  addWhites(context: ActionContext<State, State>, whites: WhiteCardModel[]) {
-    context.commit("ADD_WHITES", whites);
+  replenishHand(context: ActionContext<State, State>, whites: WhiteCardModel[]) {
+    context.commit("REPLENISH_HAND", whites);
+  },
+
+  whitePlayed(context: ActionContext<State, State>, white: WhiteCardModel) {
+    context.commit("WHITE_PLAYED", white);
   }
 
 };
