@@ -51,7 +51,7 @@ export default class State {
       let deck: DeckModel = require(`../${cfg.decksPath}/${deckFile}`);
       this.deckMap.set(deck.metadata!.name, deck);
       // If the deck has not been hyphenated yet, run hyphenopoly on it
-      if((deck.metadata?.hyphenated) == false) {
+      if(!(deck.metadata?.hyphenated)) {
         this.hyphenateDeck_de(deck,deckFile);
       }
     });
