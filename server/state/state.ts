@@ -2,10 +2,18 @@ import ServerConfig from "../config"
 const cfg: ServerConfig = new ServerConfig();
 import DeckModel from "../classes/deck"
 import ServerRoomModel from "../classes/server-room";
-
+const hyphenopoly = require("hyphenopoly");
+const hyphenator = hyphenopoly.config({
+  "require": ["de", "en-us"],
+  "hyphen": '\u00ad',
+  "exceptions": {
+      "en-us": "en-han-ces"
+  }
+});
 import fs from "fs";
 import { Socket } from "socket.io";
 import ServerPlayerModel from "../classes/server-player";
+import BlackCardModel from "../../shared/card-black";
 
 export default class State {
 
@@ -24,6 +32,14 @@ export default class State {
   constructor() {
     console.log("### Initializing state ###");
 
+    this.loadDecks();
+
+    console.log("Done loading decks");
+
+    console.log("### DONE Initializing state ###");
+  }
+
+  loadDecks() {
     // load deck Map
     console.log("Loading decks");
     // Path relative to process.cwd(). This can be affected by changing the cwd in the 'server' script of package.json.
@@ -32,13 +48,35 @@ export default class State {
     console.log(`Found ${deckFiles.length} deck${deckFiles.length === 1 ? "" : "s"}`);
 
     deckFiles.forEach(deckFile => {
-      const deck = require(`../${cfg.decksPath}/${deckFile}`);
+      let deck: DeckModel = require(`../${cfg.decksPath}/${deckFile}`);
       this.deckMap.set(deck.metadata!.name, deck);
+      // If the deck has not been hyphenated yet, run hyphenopoly on it
+      if((deck.metadata?.hyphenated) == false) {
+        this.hyphenateDeck_de(deck,deckFile);
+      }
     });
+  }
 
-    console.log("Done loading decks");
+  /**
+   * Adds optional hyphenisation symbols to the card text of the given deck
+   * according to german hyphenisation rules *EXPERIMENTAL*
+   * 
+   * @param deck The deck to hyphenize
+   * @param name The name of the deck (used for naming the output JSON file)
+   */
 
-    console.log("### DONE Initializing state ###");
+  async hyphenateDeck_de(deck: DeckModel, name: String) {
+    const hyphen = await hyphenator.get("de");
+    deck.blacks.forEach(blackCard => {
+      blackCard.text = hyphen(blackCard.text);
+    });
+    deck.whites.forEach(whiteCard => {
+      whiteCard.text = hyphen(whiteCard.text);
+    });
+    deck.metadata!.hyphenated = true;
+    console.log(deck.whites);
+    fs.writeFileSync(`../${cfg.decksPath}/${name}`, JSON.stringify(deck));
+    this.loadDecks();
   }
 
   /**

@@ -18,7 +18,7 @@ export default class DeckModel {
         this.whites.push(...deckToAdd.whites);
 
         if (this.metadata == undefined) {
-            this.metadata = new DeckMetadata("multiple", false, "multiple", [])
+            this.metadata = new DeckMetadata("multiple", false, false, "multiple", [])
         }
 
         if (deckToAdd.metadata!.nsfw) {
@@ -32,6 +32,10 @@ export default class DeckModel {
 
     drawWhites(amount: number): WhiteCardModel[] {
         return this.whites.splice(this.whites.length - amount);
+    }
+
+    hyphenate(): DeckModel  {
+        return this;
     }
 }
 

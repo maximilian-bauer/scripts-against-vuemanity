@@ -5,13 +5,13 @@
 </template>
 
 <script lang="ts">
-import Vue, { defineComponent, SetupContext, ref } from "vue";
+import { defineComponent } from "vue";
 import WhiteCardModel from "../../../shared/card-white";
 
 export default defineComponent({
   name: "CardWhite",
   props: {
-    cardModel: ref(WhiteCardModel)
+    cardModel: WhiteCardModel
   }
 });
 </script>
@@ -37,7 +37,7 @@ export default defineComponent({
   font-size: 10pt;
   font-family: "Helvetica Neue", sans-serif;
   font-weight: bold;
-  word-break: break-word;
+  hyphens: manual;
   display: inline-block;
 }
 </style>
