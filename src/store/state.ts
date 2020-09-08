@@ -9,5 +9,9 @@ export default class State {
 
   public hand: Array<WhiteCardModel> = [];
 
+  public played = false;
+
+  public czar = false;
+
   public room?: RoomModel;
 }

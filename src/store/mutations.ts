@@ -16,6 +16,14 @@ export default {
     state.connected = connected;
   },
 
+  SET_PLAYED(state: State, played: boolean) {
+    state.played = played;
+  },
+
+  SET_CZAR(state: State, czar: boolean) {
+    state.czar = czar;
+  },
+
   SET_ROOM(state: State, room: RoomModel) {
     state.room = room;
   },

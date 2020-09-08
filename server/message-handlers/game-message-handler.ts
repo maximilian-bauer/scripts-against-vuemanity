@@ -20,7 +20,11 @@ export default class GameMessageHandler {
         const playedCardIndex = player.hand.findIndex(w => w.text === white.text);
         // Remove the card from the players hand
         player.hand.splice(playedCardIndex, 1);
-
+        player.played++;
+        if(player.played >= room.board.black?.blanks!) {
+          console.log("Player" + player.nickname + "has finished playing");
+          socket.emit("setPlayed", true);
+        }
         console.log("board: " + JSON.stringify(room?.board));
 
         socket.broadcast.to(room.id).emit("whitePlayed", JSON.stringify(white));

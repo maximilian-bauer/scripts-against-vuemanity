@@ -44,6 +44,10 @@ function setupWS(store: Store<State>): void {
     console.log("white played: " + whiteMessage);
     store.dispatch("whitePlayed", white)
   });
+
+  socket.on("setPlayed", (setPlayedMessage: boolean) => {
+    store.dispatch("setPlayed", setPlayedMessage);
+  })
 }
 
 export default function createWebSocketPlugin() {

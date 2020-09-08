@@ -1,5 +1,5 @@
 import State from "./state";
-import { ActionContext } from "vuex";
+import { ActionContext, ActionObject } from "vuex";
 import WhiteCardModel from "shared/card-white";
 import RoomModel from "shared/room";
 import PlayerModel from "shared/player";
@@ -16,6 +16,15 @@ export default {
 
   setConnected(context: ActionContext<State, State>, connected: boolean) {
     context.commit("SET_CONNECTED", connected);
+  },
+
+  setPlayed(context: ActionContext<State, State>, played: boolean) {
+    console.log("Player has finished playing");
+    context.commit("SET_PLAYED", played);
+  },
+
+  setCzar(context: ActionContext<State, State>, czar: boolean) {
+    context.commit("SET_CZAR", czar);
   },
 
   setRoom(context: ActionContext<State, State>, room: RoomModel) {

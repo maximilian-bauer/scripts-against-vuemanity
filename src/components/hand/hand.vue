@@ -4,6 +4,7 @@
     <div id="card-container">
       <WhiteCard
         v-for="card in cards"
+        v-bind:style="{ 'background-color': played || czar ? 'grey' : 'white' }"
         :key="card.text"
         :cardModel="card"
         @click="playWhite(card)"
@@ -14,8 +15,8 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
-import { defineComponent, reactive } from "vue";
+import Vue, { watch } from "vue";
+import { ref, defineComponent, reactive } from "vue";
 import WhiteCard from "@/components/cards/card-white.vue";
 import Button from "@/components/ui/button.vue";
 import WhiteCardModel from "../../../shared/card-white";
@@ -28,17 +29,29 @@ export default defineComponent({
     WhiteCard,
     Button
   },
+  watch: {
+    played: function() {
+      console.log("Prop Changed");
+    }
+  },
   setup() {
     const store: Store<any> = useStore();
     const state: State = store.state;
     const cards: Array<WhiteCardModel> = reactive(store.state.hand);
+    let played = ref(state.played);
+    const czar: boolean = store.state.czar;
 
     replenishHand();
 
     function playWhite(white: WhiteCardModel) {
-      white.player = store.getters.getNickname;
+      //FIXME: Rather ugly fix for non-working reactivity of played attribute
+      played = ref(store.state.played);
+      if (!ref(played).value) {
+        console.log(ref(played).value);
+        white.player = store.getters.getNickname;
 
-      store.dispatch("playWhite", white);
+        store.dispatch("playWhite", white);
+      }
     }
 
     // TODO: Temporary function, only for testing. Once the neccessary logic is implemented, the server will decide, when to deal cards.
@@ -49,7 +62,7 @@ export default defineComponent({
       }
     }
 
-    return { cards, playWhite, replenishHand };
+    return { cards, played, czar, playWhite, replenishHand };
   }
 });
 </script>

@@ -3,6 +3,6 @@ import WhiteCardModel from "./card-white";
 
 export default class BoardModel {
 
-  black?: BlackCardModel;
+  black?: BlackCardModel = new BlackCardModel("Test", 2);
   whites: Array<WhiteCardModel> = [];
 }
