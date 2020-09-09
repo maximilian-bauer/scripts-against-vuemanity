@@ -16,11 +16,12 @@
 </template>
 
 <script lang="ts">
-import { ref, defineComponent } from "vue";
+import { defineComponent } from "vue";
 import { useStore } from "vuex";
 import BlackCard from "@/components/cards/card-black.vue";
 import WhiteCard from "@/components/cards/card-white.vue";
 import BlackCardModel from "../../../shared/card-black";
+import WhiteCardModel from '../../../shared/card-white';
 
 export default defineComponent({
   name: "Board",
@@ -30,7 +31,7 @@ export default defineComponent({
   },
   setup() {
     const black = new BlackCardModel("text", 1); //this.$store.state.room.board.black;
-    const whites = ref(useStore().state.room.board.whites);
+    const whites: WhiteCardModel[] = useStore().state.room.board.whites;
 
     return { black, whites };
   }

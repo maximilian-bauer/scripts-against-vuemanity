@@ -15,7 +15,7 @@
 </template>
 
 <script lang="ts">
-import Vue, { watch } from "vue";
+import Vue, { Ref } from "vue";
 import { ref, defineComponent, reactive } from "vue";
 import WhiteCard from "@/components/cards/card-white.vue";
 import Button from "@/components/ui/button.vue";
@@ -37,9 +37,9 @@ export default defineComponent({
   setup() {
     const store: Store<any> = useStore();
     const state: State = store.state;
-    const cards: Array<WhiteCardModel> = reactive(store.state.hand);
+    const cards: WhiteCardModel[] = state.hand;
     let played = ref(state.played);
-    const czar: boolean = store.state.czar;
+    const czar: Ref<boolean> = ref(state.czar);
 
     replenishHand();
 
@@ -54,7 +54,7 @@ export default defineComponent({
       }
     }
 
-    // TODO: Temporary function, only for testing. Once the neccessary logic is implemented, the server will decide, when to deal cards.
+    // TODO: Temporary function, only for testing. Once the necessary logic is implemented, the server will decide, when to deal cards.
     // Same goes for the replenish button.
     function replenishHand() {
       if (state.connected) {
