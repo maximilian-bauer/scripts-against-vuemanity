@@ -4,10 +4,10 @@
     <div id="card-container">
       <WhiteCard
         v-for="card in cards"
-        v-bind:style="{ 'background-color': played || czar ? 'grey' : 'white' }"
         :key="card.text"
         :cardModel="card"
         @click="playWhite(card)"
+        :style="{ 'background-color': cardBackgroundColor}"
       />
     </div>
     <Button v-on:click="replenishHand">Replenish hand</Button>
@@ -15,13 +15,13 @@
 </template>
 
 <script lang="ts">
-import Vue, { Ref } from "vue";
-import { ref, defineComponent, reactive } from "vue";
+import Vue, { defineComponent, ref, computed, ComputedRef } from "vue";
+import { useStore, Store } from "vuex";
+import State from "../../store/state";
+
 import WhiteCard from "@/components/cards/card-white.vue";
 import Button from "@/components/ui/button.vue";
 import WhiteCardModel from "../../../shared/card-white";
-import { useStore, Store } from "vuex";
-import State from "../../store/state";
 
 export default defineComponent({
   name: "Hand",
@@ -30,24 +30,22 @@ export default defineComponent({
     Button
   },
   watch: {
-    played: function() {
+    played: function () {
       console.log("Prop Changed");
     }
   },
   setup() {
     const store: Store<any> = useStore();
     const state: State = store.state;
-    const cards: WhiteCardModel[] = state.hand;
-    let played = ref(state.played);
-    const czar: Ref<boolean> = ref(state.czar);
+    const cards: ComputedRef<WhiteCardModel[]> = computed(() => { return state.hand });
+    const played: ComputedRef<boolean> = computed(() => { return state.played });
+    const czar: ComputedRef<boolean> = computed(() => { return state.czar });
+    const cardBackgroundColor: ComputedRef<string> = computed(() => { return (played.value || czar.value) ? 'grey' : 'white' });
 
     replenishHand();
 
     function playWhite(white: WhiteCardModel) {
-      //FIXME: Rather ugly fix for non-working reactivity of played attribute
-      played = ref(store.state.played);
-      if (!ref(played).value) {
-        console.log(ref(played).value);
+      if (!played.value && !czar.value) {
         white.player = store.getters.getNickname;
 
         store.dispatch("playWhite", white);
@@ -62,7 +60,7 @@ export default defineComponent({
       }
     }
 
-    return { cards, played, czar, playWhite, replenishHand };
+    return { cards, cardBackgroundColor, playWhite, replenishHand };
   }
 });
 </script>
