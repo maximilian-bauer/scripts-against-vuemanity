@@ -19,7 +19,6 @@ export default {
   },
 
   setPlayed(context: ActionContext<State, State>, played: boolean) {
-    console.log("Player has finished playing");
     context.commit("SET_PLAYED", played);
   },
 
