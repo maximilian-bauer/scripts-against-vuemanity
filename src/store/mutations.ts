@@ -2,6 +2,8 @@ import State from "./state";
 import WhiteCardModel from "shared/card-white";
 import RoomModel from "shared/room";
 import PlayerModel from "shared/player";
+import BlackCardModel from 'shared/card-black';
+import GamePhase from 'shared/game-phase';
 
 export default {
   SET_NICKNAME(state: State, nickname: string) {
@@ -40,6 +42,10 @@ export default {
     state.room?.players.set(player.nickname, player);
   },
 
+  UPDATE_PHASE(state: State, phase: GamePhase) {
+    state.room!.phase = phase;
+  },
+
   PLAY_WHITE(state: State, white: WhiteCardModel) {
     state.room?.board.whites.push(white);
     state.hand.splice(state.hand.indexOf(white), 1);
@@ -47,6 +53,10 @@ export default {
 
   REPLENISH_HAND(state: State, whites: WhiteCardModel[]) {
     state.hand.push(...whites);
+  },
+
+  UPDATE_BLACK(state: State, black: BlackCardModel){
+    state.room!.board.black = black;
   },
 
   WHITE_PLAYED(state: State, white: WhiteCardModel) {

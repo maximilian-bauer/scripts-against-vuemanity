@@ -6,6 +6,8 @@ import State from "../state";
 import io from "socket.io-client";
 import PlayerModel from "shared/player";
 import WhiteCardModel from "shared/card-white";
+import BlackCardModel from 'shared/card-black';
+import GamePhase from 'shared/game-phase';
 
 function setupWS(store: Store<State>): void {
   console.log("Trying to connect WebSocket on " + cfg.wsServerUrl);
@@ -32,11 +34,22 @@ function setupWS(store: Store<State>): void {
     const player: PlayerModel = JSON.parse(playerDisconnectMessage);
     store.dispatch("updatePlayer", player);
   });
+  
+  socket.on("phaseChange", (phaseChangeMessage: string) => {
+    const phase: GamePhase = JSON.parse(phaseChangeMessage);
+    store.dispatch("updatePhase", phase);
+  });
 
   socket.on("dealWhites", (whitesMessage: string) => {
     const whites: WhiteCardModel[] = JSON.parse(whitesMessage);
-    console.log(whites);
+    //console.log(whites);
     store.dispatch("replenishHand", whites);
+  });
+
+  socket.on("dealBlack", (blackMessage: string) => {
+    console.log("blackMessage: " + blackMessage);
+    const black: BlackCardModel = JSON.parse(blackMessage);
+    store.dispatch("updateBlack", black);
   });
 
   socket.on("whitePlayed", (whiteMessage: string) => {

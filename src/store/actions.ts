@@ -3,6 +3,8 @@ import { ActionContext, ActionObject } from "vuex";
 import WhiteCardModel from "shared/card-white";
 import RoomModel from "shared/room";
 import PlayerModel from "shared/player";
+import BlackCardModel from 'shared/card-black';
+import GamePhase from 'shared/game-phase';
 
 export default {
   setNickname(context: ActionContext<State, State>, nickname: string) {
@@ -42,6 +44,10 @@ export default {
     context.commit("UPDATE_PLAYER", player);
   },
 
+  updatePhase(context: ActionContext<State, State>, phase: GamePhase) {
+    context.commit("UPDATE_PHASE");
+  },
+
   playWhite(context: ActionContext<State, State>, white: WhiteCardModel) {
     if (context.state.connected) {
       context.commit("PLAY_WHITE", white);
@@ -55,6 +61,10 @@ export default {
 
   replenishHand(context: ActionContext<State, State>, whites: WhiteCardModel[]) {
     context.commit("REPLENISH_HAND", whites);
+  },
+
+  updateBlack(context: ActionContext<State, State>, black: BlackCardModel) {
+    context.commit("UPDATE_BLACK", black);
   },
 
   whitePlayed(context: ActionContext<State, State>, white: WhiteCardModel) {

@@ -7,7 +7,8 @@ import RoomOptions from "../../shared/room-options";
 import JoinRoomResponseType from "../../shared/join-room-response-type";
 import CreateRoomResponseType from "../../shared/create-room-response-type";
 import ServerPlayerModel from "../classes/server-player";
-
+import GamePhase from "../../shared/game-phase";
+import BlackCardModel from "../../shared/card-black";
 
 
 export default class RoomMessageHandler {
@@ -97,7 +98,18 @@ export default class RoomMessageHandler {
 
         // disallow empty decks from being loaded
         if (optionsMessage.options.decks !== []) {
+          console.log("room: " + JSON.stringify(room));
           room.loadDecks();
+          
+          // TODO: if editing room options during the game is implemented, a different phase needs to be added, so that no new black is dealt.
+          if(room.phase == GamePhase.SELECTING_OPTIONS) {
+            room.phase = GamePhase.PICKING;
+            socket.server.in(roomName).emit('phaseChange', room.phase);
+            
+            room.board.black = room.deck?.blacks.pop();
+            console.log("DEALING BLACK");
+            socket.server.in(roomName).emit('dealBlack', JSON.stringify(room.board.black));
+          }
         }
       }
 
