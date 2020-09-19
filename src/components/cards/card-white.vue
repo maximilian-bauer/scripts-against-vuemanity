@@ -5,13 +5,17 @@
 </template>
 
 <script lang="ts">
-import Vue, { defineComponent, SetupContext, ref } from "vue";
+import { defineComponent } from "vue";
 import WhiteCardModel from "../../../shared/card-white";
 
 export default defineComponent({
   name: "CardWhite",
   props: {
-    cardModel: ref(WhiteCardModel)
+    // cardModel effectively is of type WhiteCardModel.
+    // Since it is often used with v-for, iterating over an reactive array whose elements have a __v_reactive property,
+    // specifying WhiteCardModel as the type leads to ugly warning messages on the console because the elements are not recognized as WhiteCardModel.
+    // Thus the more generic type Object is used. A more elegant solution would be appreciated.
+    cardModel: Object
   }
 });
 </script>
@@ -37,7 +41,7 @@ export default defineComponent({
   font-size: 10pt;
   font-family: "Helvetica Neue", sans-serif;
   font-weight: bold;
-  word-break: break-word;
+  hyphens: manual;
   display: inline-block;
 }
 </style>

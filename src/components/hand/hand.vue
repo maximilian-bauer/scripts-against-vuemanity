@@ -7,6 +7,7 @@
         :key="card.text"
         :cardModel="card"
         @click="playWhite(card)"
+        :style="{ 'background-color': cardBackgroundColor}"
       />
     </div>
     <Button v-on:click="replenishHand">Replenish hand</Button>
@@ -14,13 +15,13 @@
 </template>
 
 <script lang="ts">
-import Vue from "vue";
-import { defineComponent, reactive } from "vue";
+import Vue, { defineComponent, ref, computed, ComputedRef } from "vue";
+import { useStore, Store } from "vuex";
+import State from "../../store/state";
+
 import WhiteCard from "@/components/cards/card-white.vue";
 import Button from "@/components/ui/button.vue";
 import WhiteCardModel from "../../../shared/card-white";
-import { useStore, Store } from "vuex";
-import State from "../../store/state";
 
 export default defineComponent({
   name: "Hand",
@@ -28,20 +29,30 @@ export default defineComponent({
     WhiteCard,
     Button
   },
+  watch: {
+    played: function () {
+      console.log("Prop Changed");
+    }
+  },
   setup() {
     const store: Store<any> = useStore();
     const state: State = store.state;
-    const cards: Array<WhiteCardModel> = reactive(store.state.hand);
+    const cards: ComputedRef<WhiteCardModel[]> = computed(() => { return state.hand });
+    const played: ComputedRef<boolean> = computed(() => { return state.played });
+    const czar: ComputedRef<boolean> = computed(() => { return state.czar });
+    const cardBackgroundColor: ComputedRef<string> = computed(() => { return (played.value || czar.value) ? 'grey' : 'white' });
 
     replenishHand();
 
     function playWhite(white: WhiteCardModel) {
-      white.player = store.getters.getNickname;
+      if (!played.value && !czar.value) {
+        white.player = store.getters.getNickname;
 
-      store.dispatch("playWhite", white);
+        store.dispatch("playWhite", white);
+      }
     }
 
-    // TODO: Temporary function, only for testing. Once the neccessary logic is implemented, the server will decide, when to deal cards.
+    // TODO: Temporary function, only for testing. Once the necessary logic is implemented, the server will decide, when to deal cards.
     // Same goes for the replenish button.
     function replenishHand() {
       if (state.connected) {
@@ -49,7 +60,7 @@ export default defineComponent({
       }
     }
 
-    return { cards, playWhite, replenishHand };
+    return { cards, cardBackgroundColor, playWhite, replenishHand };
   }
 });
 </script>
