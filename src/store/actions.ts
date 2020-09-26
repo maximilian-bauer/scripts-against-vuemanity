@@ -45,7 +45,7 @@ export default {
   },
 
   updatePhase(context: ActionContext<State, State>, phase: GamePhase) {
-    context.commit("UPDATE_PHASE");
+    context.commit("UPDATE_PHASE", phase);
   },
 
   playWhite(context: ActionContext<State, State>, white: WhiteCardModel) {
