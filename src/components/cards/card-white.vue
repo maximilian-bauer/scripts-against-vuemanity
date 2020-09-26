@@ -1,21 +1,62 @@
 <template>
   <div class="card-white">
-    <span class="text-white">{{ cardModel.text }}</span>
+    <div class="text-white">{{ cardText }}</div>
+    <div class="text-player">{{ cardPlayer }}</div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, ComputedRef, computed } from "vue";
+import { Store, useStore } from "vuex";
+import State from "../../store/state"
 import WhiteCardModel from "../../../shared/card-white";
+import GamePhase from '../../../shared/game-phase';
 
 export default defineComponent({
   name: "CardWhite",
   props: {
     // cardModel effectively is of type WhiteCardModel.
-    // Since it is often used with v-for, iterating over an reactive array whose elements have a __v_reactive property,
-    // specifying WhiteCardModel as the type leads to ugly warning messages on the console because the elements are not recognized as WhiteCardModel.
+    // Since it is often used with v-for, iterating over State warning messages on the console because the elements are not recognized as WhiteCardModel.
     // Thus the more generic type Object is used. A more elegant solution would be appreciated.
     cardModel: Object
+  },
+
+  setup(props) {
+    const store: Store<any> = useStore();
+    const state: State = store.state;
+    const gamePhase: ComputedRef<GamePhase> = computed(() => { return state.room!.phase });
+    const thisPlayerName: ComputedRef<string> = computed(() => { return state.nickname! });
+    const cardPlayerName: string = props.cardModel!.player;
+
+    console.log(cardPlayerName)
+
+    const cardText: ComputedRef<string> = computed(() => { // decide when to show the card's text
+      if (
+        (gamePhase.value == GamePhase.JUDGING || gamePhase.value == GamePhase.ROUND_FINISHED)
+        || thisPlayerName.value == cardPlayerName
+        || cardPlayerName == undefined // when card is in hand, the card has no player
+      ) {
+        return props.cardModel!.text;
+      }
+      return "";
+    });
+
+    const cardPlayer: ComputedRef<string> = computed(() => { // decide when to show the card's player
+        console.log("Calculating player name for card: " + props.cardModel!.text);
+        console.log("gamePhase.value == GamePhase.PICKING: " + (gamePhase.value == GamePhase.PICKING));
+        console.log(" gamePhase.value == GamePhase.ROUND_FINISHED: " +  (gamePhase.value == GamePhase.ROUND_FINISHED));
+        console.log("thisPlayerName.value == cardPlayerName: " + (thisPlayerName.value == cardPlayerName));
+      if (
+        (gamePhase.value == GamePhase.PICKING || gamePhase.value == GamePhase.ROUND_FINISHED)
+        || thisPlayerName.value == cardPlayerName
+      ) {
+        return cardPlayerName;
+      }
+      return "";
+    });
+
+    return { cardText, cardPlayer }
+
   }
 });
 </script>
@@ -25,7 +66,7 @@ export default defineComponent({
   background-color: #ffffff;
 
   height: 140px;
-  width: 104px;
+  width: 100px;
 
   border-radius: 7px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
@@ -33,7 +74,9 @@ export default defineComponent({
   padding: 0.75em;
   margin: 8px;
 
-  text-align: left;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: space-between;
 }
 
 .text-white {
@@ -41,7 +84,14 @@ export default defineComponent({
   font-size: 10pt;
   font-family: "Helvetica Neue", sans-serif;
   font-weight: bold;
-  hyphens: manual;
-  display: inline-block;
+  word-wrap: break-word;
+}
+
+.text-player {
+  color: #000000;
+  font-size: 9pt;
+  font-family: "Helvetica Neue", sans-serif;
+
+  text-align: right;
 }
 </style>
