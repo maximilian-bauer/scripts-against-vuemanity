@@ -42,10 +42,6 @@ export default defineComponent({
     });
 
     const cardPlayer: ComputedRef<string> = computed(() => { // decide when to show the card's player
-        console.log("Calculating player name for card: " + props.cardModel!.text);
-        console.log("gamePhase.value == GamePhase.PICKING: " + (gamePhase.value == GamePhase.PICKING));
-        console.log(" gamePhase.value == GamePhase.ROUND_FINISHED: " +  (gamePhase.value == GamePhase.ROUND_FINISHED));
-        console.log("thisPlayerName.value == cardPlayerName: " + (thisPlayerName.value == cardPlayerName));
       if (
         (gamePhase.value == GamePhase.PICKING || gamePhase.value == GamePhase.ROUND_FINISHED)
         || thisPlayerName.value == cardPlayerName
