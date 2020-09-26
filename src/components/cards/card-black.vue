@@ -12,7 +12,7 @@ import BlackCardModel from "../../../shared/card-black";
 export default defineComponent({
   name: "CardBlack",
   props: {
-    cardModel: BlackCardModel
+    cardModel: Object
   }
 });
 </script>
